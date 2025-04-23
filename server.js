@@ -15,21 +15,21 @@ app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from the "public" directory
-app.use(express.static(path.join(express-github-hotel, 'public')));
+app.use(express.static(path.join(xyz_hotel, 'public')));
 
 // Route for the home page (index.html)
 app.get('/', (req, res) => {
-  res.sendFile(path.join(express-github-hotel, 'public', 'index.html'));
+  res.sendFile(path.join(xyz_hotel, 'public', 'index.html'));
 });
 
 // Route for the member page (member.html)
 app.get('/member', (req, res) => {
-  res.sendFile(path.join(express-github-hotel, 'public', 'member.html'));
+  res.sendFile(path.join(xyz_hotel, 'public', 'member.html'));
 });
 
 // Route for the admin page (admin.html)
 app.get('/admin', (req, res) => {
-  res.sendFile(path.join(express-github-hotel, 'public', 'admin.html'));
+  res.sendFile(path.join(xyz_hotel, 'public', 'admin.html'));
 });
 
 // Read the database file path from the environment variable
