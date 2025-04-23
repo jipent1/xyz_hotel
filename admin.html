@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+      body { font-family: Arial, sans-serif; text-align: center;
+            background-color: aliceblue; }
+        table { width: 90%; margin: auto; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 10px; text-align: left; }
+        th { background-color: #f4f4f4; }
+    </style>
+</head>
+<body>
+
+    <h2>Admin Dashboard</h2>
+    <button onclick="fetchData()">Refresh Data</button>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Message</th>
+                <th>Timestamp</th> <!-- New Column for Timestamp -->
+            </tr>
+        </thead>
+        <tbody id="dataTable"></tbody>
+    </table>
+
+    <script>
+        async function fetchData() {
+            const response = await fetch("http://localhost:3000/admin");
+            const users = await response.json();
+            const tableBody = document.getElementById("dataTable");
+
+            tableBody.innerHTML = ""; // Clear previous data
+            users.forEach(user => {
+                const row = `<tr>
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.phone}</td>
+                    <td>${user.message || "No message"}</td>
+                    <td>${user.created_at || "N/A"}</td> <!-- Display Timestamp -->
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        // Fetch data on page load
+        window.onload = fetchData;
+    </script>
+
+</body>
+</html>
