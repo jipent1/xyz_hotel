@@ -4,10 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            text-align: center;
+        }
+    
+        h1 {
+            margin-top: 20px;
+        }
+    
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 80%;
+            background-color: white;
+        }
+    
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+    
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+    
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
     <h2>Admin Dashboard</h2>
-    <button onclick="fetchData()">Refresh Data</button>
+    <button id="refresh-button">Refresh Data</button>
     <table id="data-table">
         <thead>
             <tr>
@@ -30,30 +73,41 @@
             try {
                 const response = await fetch('/api/data'); // Fetch data from the server
                 const data = await response.json(); // Parse the JSON response
-
-                // Get the table body element
+    
                 const tableBody = document.getElementById('data-table').querySelector('tbody');
-
+    
                 // Clear existing data
                 tableBody.innerHTML = '';
-
+    
                 // Populate the table with fetched data
                 data.forEach(row => {
                     const tr = document.createElement('tr');
-
+    
                     // Create table cells for each column
                     const idCell = document.createElement('td');
                     idCell.textContent = row.id; // Replace 'id' with your actual column name
                     tr.appendChild(idCell);
-
+    
                     const nameCell = document.createElement('td');
                     nameCell.textContent = row.name; // Replace 'name' with your actual column name
                     tr.appendChild(nameCell);
-
+    
                     const emailCell = document.createElement('td');
                     emailCell.textContent = row.email; // Replace 'email' with your actual column name
                     tr.appendChild(emailCell);
-
+    
+                    const phoneCell = document.createElement('td');
+                    phoneCell.textContent = row.phone; // Replace 'phone' with your actual column name
+                    tr.appendChild(phoneCell);
+    
+                    const messageCell = document.createElement('td');
+                    messageCell.textContent = row.message; // Replace 'message' with your actual column name
+                    tr.appendChild(messageCell);
+    
+                    const timestampCell = document.createElement('td');
+                    timestampCell.textContent = row.timestamp; // Replace 'timestamp' with your actual column name
+                    tr.appendChild(timestampCell);
+    
                     // Append the row to the table body
                     tableBody.appendChild(tr);
                 });
@@ -61,9 +115,12 @@
                 console.error('Error fetching data:', error);
             }
         }
-
+    
         // Fetch data when the page loads
         window.onload = fetchData;
+    
+        // Add a "Refresh Data" button functionality
+        document.getElementById('refresh-button').addEventListener('click', fetchData);
     </script>
 </body>
 </html>

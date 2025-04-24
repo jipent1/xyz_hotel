@@ -5,6 +5,8 @@ const Database = require("better-sqlite3");
 const cors = require("cors");
 const path = require('path'); // For working with file paths
 const hotelName = "xyz_hotel";
+const query = 'SELECT * FROM users';
+const data = db.prepare(query).all();
 
 
 const app = express();
@@ -130,15 +132,13 @@ app.get("/admin", (req, res) => {
     res.status(200).json(data);
 });
 
-// Route to fetch data for the admin page
 app.get('/api/data', async (req, res) => {
     try {
-        // Query the database to fetch all data (replace with your database logic)
-        const query = 'SELECT * FROM users'; // Replace 'your_table_name' with your actual table name
-        const data = db.prepare(query).all(); // Use db.prepare for better-sqlite3
+        // Replace 'your_table_name' with your actual table name
+        const query = 'SELECT id, name, email, phone, message, timestamp FROM users';
+        const data = db.prepare(query).all(); // Fetch all rows
 
-        // Send the data as JSON
-        res.json(data);
+        res.json(data); // Send all rows as JSON
     } catch (error) {
         console.error('Error fetching data:', error);
         res.status(500).send('Internal Server Error');
