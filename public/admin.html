@@ -51,7 +51,7 @@
 <body>
     <h2>Admin Dashboard</h2>
     <button id="refresh-button">Refresh Data</button>
-    <table id="data-table">
+    <table id="data-table" border="1">
         <thead>
             <tr>
                 <th>ID</th>
@@ -59,20 +59,19 @@
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Message</th>
-                <th>Timestamp</th> <!-- New Column for Timestamp -->
+                <th>Timestamp</th> <!-- New Timestamp Column -->
             </tr>
         </thead>
         <tbody>
-            <!-- Data will be inserted here -->
+            <!-- Data will be dynamically inserted here -->
         </tbody>
     </table>
 
     <script>
-        // Fetch data from the server and display it in the table
         async function fetchData() {
             try {
                 const response = await fetch('/api/data'); // Fetch data from the server
-                const data = await response.json(); // Parse the JSON response
+                const data = await response.json(); // Parse JSON response
     
                 const tableBody = document.getElementById('data-table').querySelector('tbody');
     
@@ -84,29 +83,29 @@
                     const tr = document.createElement('tr');
     
                     // Create table cells for each column
-                    const idCell = document.createElement('td');
-                    idCell.textContent = row.id; // Replace 'id' with your actual column name
-                    tr.appendChild(idCell);
+                    const userIdCell = document.createElement('td');
+                    userIdCell.textContent = row.user_id;
+                    tr.appendChild(userIdCell);
     
                     const nameCell = document.createElement('td');
-                    nameCell.textContent = row.name; // Replace 'name' with your actual column name
+                    nameCell.textContent = row.name;
                     tr.appendChild(nameCell);
     
                     const emailCell = document.createElement('td');
-                    emailCell.textContent = row.email; // Replace 'email' with your actual column name
+                    emailCell.textContent = row.email;
                     tr.appendChild(emailCell);
     
                     const phoneCell = document.createElement('td');
-                    phoneCell.textContent = row.phone; // Replace 'phone' with your actual column name
+                    phoneCell.textContent = row.phone;
                     tr.appendChild(phoneCell);
     
                     const messageCell = document.createElement('td');
-                    messageCell.textContent = row.message; // Replace 'message' with your actual column name
+                    messageCell.textContent = row.message || 'No message';
                     tr.appendChild(messageCell);
     
-                    const timestampCell = document.createElement('td');
-                    timestampCell.textContent = row.timestamp; // Replace 'timestamp' with your actual column name
-                    tr.appendChild(timestampCell);
+                    const finalTimestampCell = document.createElement('td');
+                    finalTimestampCell.textContent = row.final_timestamp;
+                    tr.appendChild(finalTimestampCell);
     
                     // Append the row to the table body
                     tableBody.appendChild(tr);
@@ -119,7 +118,7 @@
         // Fetch data when the page loads
         window.onload = fetchData;
     
-        // Add a "Refresh Data" button functionality
+        // Add functionality to the "Refresh Data" button
         document.getElementById('refresh-button').addEventListener('click', fetchData);
     </script>
 </body>

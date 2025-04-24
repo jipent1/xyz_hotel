@@ -136,11 +136,25 @@ app.get("/admin", (req, res) => {
 
 app.get('/api/data', async (req, res) => {
     try {
-        // Replace 'your_table_name' with your actual table name
-        const query = 'SELECT id, name, email, phone, message, timestamp FROM users';
-        const data = db.prepare(query).all(); // Fetch all rows
+        // SQL query to join users and message tables
+        const query = `
+            SELECT 
+                users.id AS user_id, 
+                users.name, 
+                users.email, 
+                users.phone, 
+                message.message AS message, 
+                message.created_at AS final_timestamp
+            FROM users
+            LEFT JOIN message
+            ON users.email = message.id; -- Joining on 'email' since it's unique
+        `;
 
-        res.json(data); // Send all rows as JSON
+        // Fetch data from the database
+        const data = db.prepare(query).all();
+
+        // Send the data as JSON to the frontend
+        res.json(data);
     } catch (error) {
         console.error('Error fetching data:', error);
         res.status(500).send('Internal Server Error');
