@@ -6,7 +6,7 @@ const cors = require("cors");
 const path = require('path'); // For working with file paths
 const hotelName = "xyz_hotel";
 const query = 'SELECT * FROM users';
-const data = db.prepare(query).all();
+// const data = db.prepare(query).all();
 
 
 const app = express();
@@ -54,6 +54,8 @@ db.exec(`CREATE TABLE IF NOT EXISTS messages (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id)
 )`);
+
+const data = db.prepare(query).all();
 
 // Nodemailer Transporter (Update with your email credentials)
 const transporter = nodemailer.createTransport({
