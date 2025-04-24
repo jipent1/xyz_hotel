@@ -4,7 +4,7 @@ const nodemailer = require("nodemailer");
 const Database = require("better-sqlite3");
 const cors = require("cors");
 const path = require('path'); // For working with file paths
-const hotelName = xyz_hotel;
+const hotelName = "xyz_hotel";
 
 
 const app = express();
