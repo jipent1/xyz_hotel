@@ -50,7 +50,7 @@
 </head>
 <body>
     <h2>Admin Dashboard</h2>
-    <button id="refresh-button">Refresh Data</button>
+    <button id="refresh-button" onclick="fetchData()">Refresh Data</button>
     <table id="data-table" border="1">
         <thead>
             <tr>
@@ -59,7 +59,7 @@
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Message</th>
-                <th>Timestamp</th> <!-- New Timestamp Column -->
+                <th>Final Timestamp</th> <!-- Timestamp from messages table -->
             </tr>
         </thead>
         <tbody>
@@ -71,7 +71,7 @@
         async function fetchData() {
             try {
                 const response = await fetch('/api/data'); // Fetch data from the server
-                const data = await response.json(); // Parse JSON response
+                const data = await response.json(); // Parse the JSON response
     
                 const tableBody = document.getElementById('data-table').querySelector('tbody');
     
@@ -82,7 +82,6 @@
                 data.forEach(row => {
                     const tr = document.createElement('tr');
     
-                    // Create table cells for each column
                     const userIdCell = document.createElement('td');
                     userIdCell.textContent = row.user_id;
                     tr.appendChild(userIdCell);
@@ -104,10 +103,9 @@
                     tr.appendChild(messageCell);
     
                     const finalTimestampCell = document.createElement('td');
-                    finalTimestampCell.textContent = row.final_timestamp;
+                    finalTimestampCell.textContent = row.final_timestamp || 'N/A';
                     tr.appendChild(finalTimestampCell);
     
-                    // Append the row to the table body
                     tableBody.appendChild(tr);
                 });
             } catch (error) {
@@ -115,11 +113,8 @@
             }
         }
     
-        // Fetch data when the page loads
+        // Fetch data on page load
         window.onload = fetchData;
-    
-        // Add functionality to the "Refresh Data" button
-        document.getElementById('refresh-button').addEventListener('click', fetchData);
     </script>
 </body>
 </html>

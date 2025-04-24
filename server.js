@@ -136,30 +136,31 @@ app.get("/admin", (req, res) => {
 
 app.get('/api/data', async (req, res) => {
     try {
-        // SQL query to join users and message tables
+        // SQL query to join users and messages tables
         const query = `
             SELECT 
                 users.id AS user_id, 
                 users.name, 
                 users.email, 
                 users.phone, 
-                message.message AS message, 
-                message.created_at AS final_timestamp
+                messages.message AS message, 
+                messages.created_at AS final_timestamp
             FROM users
-            LEFT JOIN message
-            ON users.email = message.id; -- Joining on 'email' since it's unique
+            LEFT JOIN messages
+            ON users.id = messages.user_id;
         `;
 
         // Fetch data from the database
         const data = db.prepare(query).all();
 
-        // Send the data as JSON to the frontend
+        // Return the data as JSON
         res.json(data);
     } catch (error) {
-        console.error('Error fetching data:', error);
-        res.status(500).send('Internal Server Error');
+        console.error('Error fetching data:', error.message); // Log the specific error message
+        res.status(500).send('Internal Server Error'); // Return a 500 error to the client
     }
 });
+
 
 // Start Server
 app.listen(PORT, () => {
