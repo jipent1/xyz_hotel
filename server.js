@@ -130,6 +130,21 @@ app.get("/admin", (req, res) => {
     res.status(200).json(data);
 });
 
+// Route to fetch data for the admin page
+app.get('/api/data', async (req, res) => {
+    try {
+        // Query the database to fetch all data (replace with your database logic)
+        const query = 'SELECT * FROM users'; // Replace 'your_table_name' with your actual table name
+        const data = db.prepare(query).all(); // Use db.prepare for better-sqlite3
+
+        // Send the data as JSON
+        res.json(data);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 // Start Server
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
