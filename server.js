@@ -16,23 +16,22 @@ app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from the "public" directory
-app.use(express.static(path.join(__xyz_hotel, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Route for the home page (index.html)
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__xyz_hotel, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Route for the member page
 app.get('/member', (req, res) => {
-  res.sendFile(path.join(__xyz_hotel, 'public', 'member.html'));
+  res.sendFile(path.join(__dirname, 'public', 'member.html'));
 });
 
 // Route for the admin page
 app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__xyz_hotel, 'public', 'admin.html'));
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
-
 
 // Read the database file path from the environment variable
 const dbFile = process.env.DATABASE_FILE || 'users.db';
