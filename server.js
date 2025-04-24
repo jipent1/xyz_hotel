@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from the "public" directory
-app.use(express.static(path.join(__Xyz_hotel, 'public')));
+app.use(express.static(path.join(__xyz_hotel, 'public')));
 
 // Route for the home page (index.html)
 app.get('/', (req, res) => {
