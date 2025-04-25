@@ -68,6 +68,7 @@
     </table>
 
     <script>
+        // Function to fetch and display data
         async function fetchData() {
             try {
                 const response = await fetch('/api/data'); // Fetch data from the server
@@ -112,6 +113,9 @@
                 console.error('Error fetching data:', error);
             }
         }
+    
+        // Automatically refresh data every 10 seconds
+        setInterval(fetchData, 10000);
     
         // Fetch data on page load
         window.onload = fetchData;
