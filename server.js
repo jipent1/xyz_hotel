@@ -136,7 +136,7 @@ app.get("/admin", (req, res) => {
 
 app.get('/api/data', async (req, res) => {
     try {
-        // SQL query to join users and messages tables
+        // SQL query to join users and messages tables and order by created_at (most recent first)
         const query = `
             SELECT 
                 users.id AS user_id, 
@@ -147,7 +147,8 @@ app.get('/api/data', async (req, res) => {
                 messages.created_at AS final_timestamp
             FROM users
             LEFT JOIN messages
-            ON users.id = messages.user_id;
+            ON users.id = messages.user_id
+            ORDER BY messages.created_at DESC;
         `;
 
         // Fetch data from the database
