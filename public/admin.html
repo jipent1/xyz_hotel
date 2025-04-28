@@ -71,7 +71,7 @@
         // Function to fetch and display data
         async function fetchData() {
             try {
-                const response = await fetch('/api/data'); // Fetch data from the server
+                const response = await fetch(`/api/data?timestamp=${Date.now()}`); // Fetch data from the server
                 const data = await response.json(); // Parse the JSON response
     
                 const tableBody = document.getElementById('data-table').querySelector('tbody');
