@@ -1,169 +1,82 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const nodemailer = require("nodemailer");
-const Database = require("better-sqlite3");
-const cors = require("cors");
-const path = require('path'); // For working with file paths
-const hotelName = "xyz_hotel";
-const query = 'SELECT * FROM users';
-// const data = db.prepare(query).all();
+const express = require('express');
+const bodyParser = require('body-parser');
+const sqlite3 = require('sqlite3').verbose();
+const bcrypt = require('bcrypt');
+const path = require('path');
 
-
+// Initialize the app
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Middleware
-app.use(cors());
 app.use(bodyParser.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve static files from the "public" directory
+// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Route for the home page (index.html)
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// Initialize the database
+const db = new sqlite3.Database('users.db');
 
-// Route for the member page
-app.get('/member', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'member.html'));
-});
+// Routes
 
-// Route for the admin page
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-// Read the database file path from the environment variable
-const dbFile = process.env.DATABASE_FILE || 'users.db';
-
-// Initialize SQLite Database
-const db = new Database("users.db", { verbose: console.log });
-db.exec(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    email TEXT UNIQUE,
-    phone TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)`);
-db.exec(`CREATE TABLE IF NOT EXISTS messages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    message TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(user_id) REFERENCES users(id)
-)`);
-
-const data = db.prepare(query).all();
-
-// Nodemailer Transporter (Update with your email credentials)
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "jipent123@gmail.com", 
-      pass: "dphuxmtivvxrpqmy"  
-    }
-});
-
-// 📌 Route 1: Handle Sign-up (Prevents Duplicate Sign-ups)
-app.post("/signup", (req, res) => {
+// 1. User Registration
+app.post('/api/register', (req, res) => {
     const { name, email, phone } = req.body;
-    if (!name || !email || !phone) {
-        return res.status(400).json({ error: "All fields are required" });
-    }
-
-    // Check if user already exists
-    const existingUser = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
-    if (existingUser) {
-        return res.status(400).json({ error: "User already exists! Sign up not allowed twice." });
-    }
-
-    // Insert new user
-    const stmt = db.prepare("INSERT INTO users (name, email, phone) VALUES (?, ?, ?)");
-    stmt.run(name, email, phone);
-
-    res.status(200).json({ message: "Signup successful!" });
+    const query = `INSERT INTO users (name, email, phone) VALUES (?, ?, ?)`;
+    db.run(query, [name, email, phone], function (err) {
+        if (err) {
+            return res.status(400).json({ error: err.message });
+        }
+        res.json({ id: this.lastID, message: 'User registered successfully!' });
+    });
 });
 
-// 📌 Route 2: Handle Message Submission (Prevents Overwriting)
-app.post("/message", (req, res) => {
-    const { name, email, message } = req.body;
-    if (!name || !email || !message) {
-        return res.status(400).json({ error: "All fields are required" });
-    }
-
-    // Check if user exists
-    const user = db.prepare("SELECT id FROM users WHERE email = ?").get(email);
-    if (!user) {
-        return res.status(404).json({ error: "User not found! Please sign up first." });
-    }
-
-    // Insert a new message (instead of updating)
-    const stmt = db.prepare("INSERT INTO messages (user_id, message) VALUES (?, ?)");
-    stmt.run(user.id, message);
-
-    // Send confirmation email
-    const mailOptions = {
-        from: "your-email@gmail.com",
-        to: email,
-        subject: "Message Received",
-        text: `Hello ${name},\n\nWe have received your message:\n"${message}"\n\nThank you!\n`
-    };
-
-    transporter.sendMail(mailOptions)
-        .then(() => res.status(200).json({ message: "Message submitted successfully!" }))
-        .catch(error => res.status(500).json({ error: "Email sending failed" }));
+// 2. Member Messages
+app.post('/api/message', (req, res) => {
+    const { user_id, message } = req.body;
+    const query = `INSERT INTO messages (user_id, message) VALUES (?, ?)`;
+    db.run(query, [user_id, message], function (err) {
+        if (err) {
+            return res.status(400).json({ error: err.message });
+        }
+        res.json({ id: this.lastID, message: 'Message sent successfully!' });
+    });
 });
 
-// Define a route for the root URL
-app.get('/', (req, res) => {
-    res.send('Welcome to the XYZ Hotels!');
-  });
-
-// 📌 Route 3: Admin Page - View Database Content (Now Shows Timestamp)
-app.get("/admin", (req, res) => {
-    const stmt = db.prepare(`
-        SELECT users.id, users.name, users.email, users.phone, messages.message, messages.created_at 
-        FROM users 
-        LEFT JOIN messages ON users.id = messages.user_id
-        ORDER BY messages.created_at DESC
-    `);
-    const data = stmt.all();
-
-    res.status(200).json(data);
-});
-
-app.get('/api/data', async (req, res) => {
-    try {
-        // SQL query to join users and messages tables and order by created_at (most recent first)
-        const query = `
-            SELECT 
-                users.id AS user_id, 
-                users.name, 
-                users.email, 
-                users.phone, 
-                messages.message AS message, 
-                messages.created_at AS final_timestamp
-            FROM users
-            LEFT JOIN messages
-            ON users.id = messages.user_id
-            ORDER BY messages.created_at DESC;
-        `;
-
-        // Fetch data from the database
-        const data = db.prepare(query).all();
-
-        // Return the data as JSON
-        res.json(data);
-    } catch (error) {
-        console.error('Error fetching data:', error.message); // Log the specific error message
-        res.status(500).send('Internal Server Error'); // Return a 500 error to the client
+// 3. Admin Login
+const ADMIN_PASSWORD_HASH = bcrypt.hashSync('admin123', 10); // Hardcoded admin password
+app.post('/api/admin-login', (req, res) => {
+    const { password } = req.body;
+    if (bcrypt.compareSync(password, ADMIN_PASSWORD_HASH)) {
+        res.json({ success: true, message: 'Admin authenticated successfully!' });
+    } else {
+        res.status(401).json({ success: false, message: 'Invalid password' });
     }
 });
 
+// 4. Fetch Database Content for Admin
+app.get('/api/data', (req, res) => {
+    const query = `
+        SELECT 
+            users.id AS user_id,
+            users.name,
+            users.email,
+            users.phone,
+            messages.message,
+            messages.created_at AS timestamp
+        FROM users
+        LEFT JOIN messages
+        ON users.id = messages.user_id
+        ORDER BY messages.created_at DESC;
+    `;
+    db.all(query, [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows);
+    });
+});
 
-// Start Server
+// Start the server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 });

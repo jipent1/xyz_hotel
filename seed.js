@@ -1,9 +1,11 @@
-const sqlite3 = require('sqlite3').verbose(); // Import SQLite3 library
-const db = new sqlite3.Database('users.db'); // Connect to the database
+const sqlite3 = require('sqlite3').verbose();
 
-// Seed the database
+// Initialize the database
+const db = new sqlite3.Database('users.db');
+
+// Create tables and seed data
 db.serialize(() => {
-    // Create the "users" table if it doesn't already exist
+    // Create users table
     db.run(`
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -11,10 +13,10 @@ db.serialize(() => {
             email TEXT UNIQUE NOT NULL,
             phone TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
+        )
     `);
 
-    // Create the "messages" table if it doesn't already exist
+    // Create messages table
     db.run(`
         CREATE TABLE IF NOT EXISTS messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,29 +24,15 @@ db.serialize(() => {
             message TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(user_id) REFERENCES users(id)
-        );
+        )
     `);
 
-    // Insert sample data into the "users" table
-    db.run(`
-        INSERT OR IGNORE INTO users (name, email, phone)
-        VALUES 
-        ('Jim Nwachukwu', 'jimnwachukwu@yahoo.com', '07034711075'),
-        ('Jane Doe', 'janedoe@gmail.com', '08012345678'),
-        ('John Smith', 'johnsmith@gmail.com', '08123456789');
-    `);
+    // Seed data
+    db.run(`INSERT INTO users (name, email, phone) VALUES ('John Doe', 'john@example.com', '1234567890')`);
+    db.run(`INSERT INTO messages (user_id, message) VALUES (1, 'Looking forward to my stay at XYZ Hotel!')`);
+    db.run(`INSERT INTO messages (user_id, message) VALUES (1, 'Can I get a room with a sea view?')`);
 
-    // Insert sample data into the "messages" table
-    db.run(`
-        INSERT OR IGNORE INTO messages (user_id, message)
-        VALUES 
-        (1, 'Welcome to XYZ Hotels, a home away from home'),
-        (2, 'Looking forward to my next stay!'),
-        (3, 'Great hospitality and excellent service.');
-    `);
-
-    console.log('Database seeding complete!');
+    console.log('Database seeded successfully!');
 });
 
-// Close the database connection
 db.close();
