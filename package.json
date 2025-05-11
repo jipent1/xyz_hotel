@@ -16,6 +16,7 @@
     "nodemailer": "^6.10.1",
     "sqlite3": "^5.1.6"
   },
+  "devDependencies": {},
   "author": "jipent1",
   "license": "ISC"
 }

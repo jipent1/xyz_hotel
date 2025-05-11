@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XYZ Hotel - Admin Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="top">
+        <h1>Admin Dashboard</h1>
+    </div>
+    
+
+    <main>
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Message</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be populated here -->
+            </tbody>
+        </table>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        // Fetch and display data
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+
+                const tableBody = document.getElementById('data-table').querySelector('tbody');
+                tableBody.innerHTML = '';
+
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.user_id}</td>
+                        <td>${row.name}</td>
+                        <td>${row.phone}</td>
+                        <td>${row.email}</td>
+                        <td>${row.message || 'No message'}</td>
+                        <td>${row.timestamp || 'N/A'}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Refresh data every 10 seconds
+        setInterval(fetchData, 10000);
+        fetchData();
+    </script>
+</body>
+</html>

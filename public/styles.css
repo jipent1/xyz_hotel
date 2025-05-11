@@ -1,0 +1,230 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+     background-image: url("hotel.jpeg");
+     background-repeat: no-repeat;
+     background-size: cover;
+}
+
+.container, form {
+    /* width: 100%;
+    max-width: 400px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center; */
+
+  background: rgba(44, 62, 80, 0.7);
+  padding: 35px;
+  width: 250px;
+  height: 300px;
+  margin: auto;
+  margin-top: 10px;
+  margin-right: auto;
+}
+
+/* Heading 
+h1 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}*/
+
+/* Forms 
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+label {
+    font-size: 14px;
+    color: #555;
+    text-align: left;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+button {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+    */
+
+/* Error and Success Messages */
+#response-message {
+    margin-top: 10px;
+    font-size: 14px;
+    text-align: center;
+}
+
+#response-message.error {
+    color: red;
+}
+
+#response-message.success {
+    color: green;
+}
+
+/* Links */
+a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Admin Page */
+.admin-container {
+    max-width: 600px;
+}
+
+.admin-container  {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.admin-container .action-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.admin-container .action-buttons button {
+    flex: 1;
+    font-size: 14px;
+    padding: 8px;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th,
+table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+table th {
+    background-color: #007bff;
+    color: white;
+}
+
+table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table tr:hover {
+    background-color: #f1f1f1;
+}
+
+
+input, textarea{
+  width: 240px;
+  text-align: center;
+  background: transparent;
+  border: none;
+  border-bottom: solid white;
+  font-size: 20px;
+  font-weight: bolder;
+  padding: 5px;
+  outline: none;
+  height: 20px;
+
+}
+
+button {
+  width: 180px;
+  font-size: 25px;
+  line-height: 30px;
+  padding: 10px 0;
+  cursor: pointer;
+  border-radius: 30px;
+  border: none;
+  background-color: black;
+  color: white;
+  margin-top: 5px;
+}
+
+.top {
+    position: relative;
+    text-align: center;
+    margin-bottom: 450px;
+    width: 350px;
+
+}
+/* hoover effect on button */
+button:hover {
+  background-color: white;
+  color: black;
+}
+h1 , h2 {
+    text-align: center;
+}
+
+label{
+    font-size: 14px;
+    color: wheat;
+    text-align: left;
+}
+ Admin Dashboard {
+    text-align: center;
+    color: yellow;
+ }
+
+  .adminLogin {
+    text-align: right;
+    margin-top: 500px;
+    font-style: italic;
+     color: wheat;
+     margin-left: 250px;
+  }
+
+  .signIn, .signUp {
+  color: wheat;
+}
+
+a{
+  color: yellow;
+}
+a:hover{
+color: cyan;
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XYZ Hotel - Admin Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="top">
+        <h1>Admin Login</h1>
+    </div>
+
+    <div>
+        <form id="login-form">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit">Login</button>
+        </form>
+
+        <p id="response-message"></p>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+       // Handle admin login
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const password = document.getElementById('password').value;
+
+    try {
+        const response = await fetch('/api/admin-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            // Redirect on successful login
+            console.log(result.message);
+            window.location.href = '/admin.html';
+        } else {
+            // Show error message
+            const messageElement = document.getElementById('response-message');
+            messageElement.textContent = result.error || 'Login failed.';
+            messageElement.style.color = 'red';
+        }
+    } catch (error) {
+        console.error('Error during login:', error);
+    }
+});
+    </script>
+</body>
+</html>
