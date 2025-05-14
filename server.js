@@ -1,3 +1,5 @@
+require('dotenv').config(); // Load environment variables from .env file
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
@@ -5,6 +7,7 @@ const bcrypt = require('bcrypt');
 const path = require('path');
 const nodemailer = require('nodemailer');  
 const crypto = require('crypto');
+const PORT = process.env.PORT || 3000;
 
 
 // Initialize the app
@@ -259,8 +262,11 @@ app.get('/api/data', (req, res) => {
     });
 });
 
+
+// Example usage of an environment variable
+console.log('Database URL:', process.env.DATABASE_URL);
+
 // Start the server
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });

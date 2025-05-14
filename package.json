@@ -12,11 +12,11 @@
     "better-sqlite3": "^11.9.1",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "nodemailer": "^6.10.1",
     "sqlite3": "^5.1.6"
   },
-  "devDependencies": {},
   "author": "jipent1",
   "license": "ISC"
 }
