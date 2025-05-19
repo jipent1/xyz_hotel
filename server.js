@@ -9,6 +9,15 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const PORT = process.env.PORT || 3000;
 
+const DATABASE_URL = process.env.DATABASE_URL || 'file:./database.sqlite3';
+const db = new sqlite3.Database(DATABASE_URL, sqlite3.OPEN_READWRITE,  (err) => {
+    if (err) {
+        console.error('Error connecting to database:', err);
+    } else {
+        console.log('Connected to the database');
+    }
+});
+
 
 // Initialize the app
 const app = express();
@@ -152,7 +161,7 @@ app.post('/api/message', (req, res) => {
 });
 
 // Initialize the database
-const db = new sqlite3.Database('users.db');
+// const db = new sqlite3.Database('users.db');
 
 // Routes
 
@@ -262,6 +271,8 @@ app.get('/api/data', (req, res) => {
     });
 });
 
+const seedDatabase = require('./seed'); // Adjust the path if needed
+seedDatabase(); // Ensure this runs before the server starts
 
 // Example usage of an environment variable
 console.log('Database URL:', process.env.DATABASE_URL);
