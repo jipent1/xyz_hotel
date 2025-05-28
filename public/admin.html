@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XYZ Hotel - Admin Dashboard</title>
+    <title>Admin Dashboard</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h2>Admin Dashboard</h2>
-       <div>
+    <div>
         <table id="data-table">
             <thead>
                 <tr>
@@ -25,8 +25,6 @@
             </tbody>
         </table>
     </div>
-
-    <script src="script.js"></script>
     <script>
         // Fetch and display data
         async function fetchData() {
@@ -44,8 +42,8 @@
                         <td>${row.name}</td>
                         <td>${row.phone}</td>
                         <td>${row.email}</td>
-                        <td>${row.message || 'No message'}</td>
-                        <td>${row.timestamp || 'N/A'}</td>
+                        <td>${row.message ? row.message : 'No message'}</td>
+                        <td>${row.timestamp ? row.timestamp : ''}</td>
                     `;
                     tableBody.appendChild(tr);
                 });

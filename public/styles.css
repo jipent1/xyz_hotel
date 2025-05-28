@@ -83,17 +83,17 @@ button:hover {
     */
 
 /* Error and Success Messages */
-#response-message {
+#response-message, #response{
     margin-top: 10px;
     font-size: 14px;
     text-align: center;
 }
 
-#response-message.error {
+#response-message.error, #response.error {
     color: red;
 }
 
-#response-message.success {
+#response-message.success, #response.success {
     color: green;
 }
 
@@ -200,11 +200,11 @@ h1 , h2 {
     text-align: center;
 }
 
-label{
+/* label{
     font-size: 14px;
     color: wheat;
     text-align: left;
-}
+} */
  Admin Dashboard {
     text-align: center;
     color: yellow;
@@ -230,4 +230,13 @@ color: cyan;
 }
 h3{
     margin-top: -35px;
+}
+
+#response-message, #response{
+    text-align: center;
+}
+
+.forgotPassword{
+    font-size: 10px;
+    font-style: italic;
 }

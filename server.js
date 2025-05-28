@@ -5,250 +5,207 @@ const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
 const path = require('path');
-const nodemailer = require('nodemailer');  
+const nodemailer = require('nodemailer');
+const cors = require('cors');
 const crypto = require('crypto');
+
 const PORT = process.env.PORT || 3000;
 
-const DATABASE_URL = process.env.DATABASE_URL || 'file:./database.sqlite3';
-const db = new sqlite3.Database(DATABASE_URL, sqlite3.OPEN_READWRITE,  (err) => {
-    if (err) {
-        console.error('Error connecting to database:', err);
-    } else {
-        console.log('Connected to the database');
-    }
-});
+// Unified database path logic: always use this
+const dbPath = process.env.DATABASE_URL || 'users.db';
+console.log("Database URL:", dbPath);
 
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error('Error connecting to database:', err);
+  } else {
+    console.log('Connected to the database');
+  }
+});
 
 // Initialize the app
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve static files
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static files (if any)
+app.use(express.static('public'));
 
-// const crypto = require('crypto');
-
-// Generate and send reset token
-app.post('/api/reset-password', (req, res) => {
-    const { email } = req.body;
-
-    const resetToken = crypto.randomBytes(32).toString('hex'); // Generate a random token
-    const updateTokenQuery = `UPDATE users SET reset_token = ? WHERE email = ?`;
-
-    db.run(updateTokenQuery, [resetToken, email], function (err) {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        if (this.changes === 0) {
-            return res.status(404).json({ error: 'Email not found' });
-        }
-
-        // Correct the reset link to point to new-password.html
-        const resetLink = `http://localhost:3000/new-password.html?token=${resetToken}`; // Updated to new-password.html
-        const mailOptions = {
-            from: 'jipent123@gmail.com',
-            to: email,
-            subject: 'Password Reset - XYZ Hotel',
-            text: `Hello,\n\nClick the link below to reset your password:\n${resetLink}\n\nBest regards,\nXYZ Hotel`
-        };
-
-        transporter.sendMail(mailOptions, (err, info) => {
-            if (err) {
-                console.error('Error sending email:', err);
-                return res.status(500).json({ error: 'Failed to send reset email' });
-            }
-            console.log('Reset email sent:', info.response);
-            res.json({ message: 'Password reset email sent successfully!' });
-        });
-    });
-});
-
-// Reset password with token
-app.post('/api/update-password', (req, res) => {
-    const { token, newPassword } = req.body;
-
-    if (!token || !newPassword) {
-        return res.status(400).json({ error: 'Token and new password are required.' });
-    }
-
-    // Validate token and fetch user
-    const getTokenQuery = `SELECT id FROM users WHERE reset_token = ?`;
-    db.get(getTokenQuery, [token], (err, user) => {
-        if (err) {
-            console.error('Error fetching user by token:', err.message);
-            return res.status(500).json({ error: 'Internal server error.' });
-        }
-        if (!user) {
-            console.log('Invalid or expired token.');
-            return res.status(400).json({ error: 'Invalid or expired reset token.' });
-        }
-
-        console.log('User found for token:', user);
-
-        // Hash the new password
-        const hashedPassword = bcrypt.hashSync(newPassword, 10);
-        console.log('New hashed password:', hashedPassword);
-
-        // Update password and clear reset token
-        const updatePasswordQuery = `UPDATE users SET password = ?, reset_token = NULL WHERE id = ?`;
-        db.run(updatePasswordQuery, [hashedPassword, user.id], function (err) {
-            if (err) {
-                console.error('Error updating password:', err.message);
-                return res.status(500).json({ error: 'Failed to update password.' });
-            }
-
-            if (this.changes === 0) {
-                console.log('No rows updated. Likely an invalid user ID.');
-                return res.status(400).json({ error: 'Password update failed.' });
-            }
-
-            console.log('Password updated successfully for user ID:', user.id);
-            res.json({ message: 'Password updated successfully!' });
-        });
-    });
-});
-
-// Configure Nodemailer
-const transporter = nodemailer.createTransport({
-  service: 'gmail', // Use your email provider (Gmail, Outlook, etc.)
-  auth: {
-      user: 'jipent123@gmail.com', // Replace with your email
-      pass: 'dphuxmtivvxrpqmy'  // Replace with your email password or app password
-  }
-});
-
-// Route to submit a message and send confirmation email
-app.post('/api/message', (req, res) => {
-  const { email, message } = req.body;
-
-  // Get user ID by email
-  const getUserQuery = `SELECT id FROM users WHERE email = ?`;
-  db.get(getUserQuery, [email], (err, user) => {
-      if (err) {
-          return res.status(500).json({ error: err.message });
-      }
-      if (!user) {
-          return res.status(404).json({ error: 'User not found. Please register first.' });
-      }
-
-      // Insert message
-      const insertMessageQuery = `INSERT INTO messages (user_id, message) VALUES (?, ?)`;
-      db.run(insertMessageQuery, [user.id, message], function (err) {
-          if (err) {
-              return res.status(400).json({ error: err.message });
-          }
-
-          // Send confirmation email
-          const mailOptions = {
-              from: 'jipent123@gmail.com',
-              to: email,
-              subject: 'Message Received - XYZ Hotel',
-              text: `Hello,\n\nThank you for your message:\n"${message}"\n\nOur team will get back to you shortly.\n\nBest regards,\nXYZ Hotel`
-          };
-
-          transporter.sendMail(mailOptions, (err, info) => {
-              if (err) {
-                  console.error('Error sending email:', err);
-                  return res.status(500).json({ error: 'Failed to send confirmation email' });
-              }
-              console.log('Email sent:', info.response);
-
-              res.json({ id: this.lastID, message: 'Message sent successfully! Confirmation email sent.' });
-          });
-      });
-  });
-});
-
-// Initialize the database
-// const db = new sqlite3.Database('users.db');
-
-// Routes
-
-// 1. User Registration
-app.post('/api/register', (req, res) => {
-    const { name, email, phone } = req.body;
-    const query = `INSERT INTO users (name, email, phone) VALUES (?, ?, ?)`;
-    db.run(query, [name, email, phone], function (err) {
-        if (err) {
-            return res.status(400).json({ error: err.message });
-        }
-        res.json({ id: this.lastID, message: 'User registered successfully!' });
-    });
-});
-
-// 2. Member Messages
-app.post('/api/message', (req, res) => {
-  const { email, message } = req.body;
-
-  // Find user by email
-  const queryUser = `SELECT id FROM users WHERE email = ?`;
-  db.get(queryUser, [email], (err, row) => {
-      if (err) {
-          return res.status(500).json({ error: 'Database error' });
-      }
-
-      if (!row) {
-          return res.status(404).json({ error: 'User not found' });
-      }
-
-      const userId = row.id;
-
-      // Insert the message
-      const queryMessage = `INSERT INTO messages (user_id, message) VALUES (?, ?)`;
-      db.run(queryMessage, [userId, message], function (err) {
-          if (err) {
-              return res.status(400).json({ error: err.message });
-          }
-          res.json({ id: this.lastID, message: 'Message sent successfully!' });
-      });
-  });
-});
-
-// 3. Admin Login
-const ADMIN_PASSWORD_HASH = bcrypt.hashSync('admin123', 10); // Hardcoded admin password
+// Example route for registering a new user
 /*
-app.post('/api/admin-login', (req, res) => {
-    const { password } = req.body;
-    if (bcrypt.compareSync(password, ADMIN_PASSWORD_HASH)) {
-        res.json({ success: true, message: 'Admin authenticated successfully!' });
-    } else {
-        res.status(401).json({ success: false, message: 'Invalid password' });
+app.post('/register', (req, res) => {
+  const { name, email, phone, password } = req.body;
+  if (!name || !email || !phone || !password) {
+    return res.status(400).json({ error: 'All fields are required.' });
+  }
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
+  const sql = `INSERT INTO users (name, email, phone, password) VALUES (?, ?, ?, ?)`;
+  db.run(sql, [name, email, phone, hashedPassword], function(err) {
+    if (err) {
+      if (err.code === 'SQLITE_CONSTRAINT') {
+        return res.status(400).json({ error: 'Email already registered.' });
+      }
+      return res.status(500).json({ error: 'Database error.' });
     }
+    res.status(201).json({ message: 'User registered successfully!', userId: this.lastID });
+  });
 });
 */
-app.post('/api/admin-login', (req, res) => {
-    const { password } = req.body;
 
-    console.log('Admin login attempt with password:', password);
+app.post('/register', (req, res) => {
+    const { name, email, phone, password } = req.body;
+    if (!name || !email || !phone || !password) {
+        return res.status(400).json({ error: 'All fields are required.' });
+    }
+    db.get('SELECT * FROM users WHERE email = ?', [email], (err, user) => {
+        if (err) return res.status(500).json({ error: 'Database error.' });
+        if (user) return res.status(400).json({ error: 'Email already registered.' });
 
-    const getAdminQuery = `SELECT password FROM users WHERE email = 'jipent123@gmail.com'`;
-    db.get(getAdminQuery, (err, user) => {
-        if (err) {
-            console.error('Error fetching admin user:', err.message);
-            return res.status(500).json({ error: 'Internal server error.' });
-        }
-
-        if (!user) {
-            console.log('Admin user not found in the database.');
-            return res.status(404).json({ error: 'Admin user not found.' });
-        }
-
-        console.log('Admin user retrieved:', user);
-
-        // Compare entered password with hashed password
-        const isMatch = bcrypt.compareSync(password, user.password);
-        if (!isMatch) {
-            console.log('Invalid password entered.');
-            return res.status(401).json({ error: 'Invalid password.' });
-        }
-
-        console.log('Password valid. Redirecting to admin.html.');
-        res.json({ message: 'Login successful!' });
+        const hashedPassword = require('bcrypt').hashSync(password, 10);
+        db.run('INSERT INTO users (name, email, phone, password, created_at) VALUES (?, ?, ?, ?, datetime("now"))',
+            [name, email, phone, hashedPassword],
+            function(err) {
+                if (err) return res.status(500).json({ error: 'Database error.' });
+                res.json({ message: 'Registration successful!' });
+            }
+        );
     });
 });
 
-// 4. Fetch Database Content for Admin
+// Email transporter setup (Gmail example, see .env section below)
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
+transporter.verify((error, success) => {
+    if (error) {
+        console.error('Email transport error:', error);
+    } else {
+        console.log('Email server is ready to take messages');
+    }
+});
+
+// Example route for posting a message
+/*app.post('/messages', (req, res) => {
+  const { email, message } = req.body;
+  if (!email || !message) {
+    return res.status(400).json({ error: 'Email and message are required.' });
+  }
+  db.get(`SELECT id FROM users WHERE email = ?`, [email], (err, user) => {
+    if (err) return res.status(500).json({ error: 'Database error.' });
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+
+    db.run(`INSERT INTO messages (user_id, message) VALUES (?, ?)`, [user.id, message], function(err) {
+      if (err) return res.status(500).json({ error: 'Database error.' });
+      res.status(201).json({ message: 'Message posted!', messageId: this.lastID });
+    });
+  });
+});
+*/
+
+app.post('/messages', (req, res) => {
+    const { email, message } = req.body;
+    if (!email || !message) {
+        return res.status(400).json({ error: 'Email and message are required.' });
+    }
+    db.get('SELECT id, name FROM users WHERE email = ?', [email], (err, user) => {
+        if (err) return res.status(500).json({ error: 'Database error.' });
+        if (!user) return res.status(404).json({ error: 'User not found.' });
+
+        db.run('INSERT INTO messages (user_id, message) VALUES (?, ?)', [user.id, message], function(err) {
+            if (err) return res.status(500).json({ error: 'Database error.' });
+
+            // Send confirmation email
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: 'Message Received - XYZ Hotel',
+                text: `Hello${user.name ? ' ' + user.name : ''},\n\nThank you for your message:\n"${message}"\n\nOur team will get back to you shortly.\n\nBest regards,\nXYZ Hotel`
+            };
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error('Confirmation email error:', error);
+                    return res.json({ message: 'Message posted! (Email confirmation failed)' });
+                }
+                res.json({ message: 'Message posted! Confirmation email sent.' });
+            });
+        });
+    });
+});
+
+
+app.post('/admin-login', (req, res) => {
+    const { email, password } = req.body;
+    db.get(`SELECT * FROM users WHERE email = ?`, [email], (err, user) => {
+        if(err) return res.status(500).json({ error: 'Database error.' });
+        if(!user || user.name.toLowerCase() !== 'admin') return res.status(401).json({ error: 'Not an admin or invalid credentials.' });
+        if(!bcrypt.compareSync(password, user.password)) return res.status(401).json({ error: 'Invalid credentials.' });
+        res.json({ success: true });
+    });
+});
+
+
+app.post('/reset-password', (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required.' });
+
+    db.get(`SELECT * FROM users WHERE email = ?`, [email], (err, user) => {
+        if (err) return res.status(500).json({ error: 'Database error.' });
+        if (!user) return res.status(404).json({ error: 'No user with that email.' });
+
+        const token = crypto.randomBytes(32).toString('hex');
+        db.run(`UPDATE users SET reset_token = ? WHERE email = ?`, [token, email], function(err) {
+            if (err) return res.status(500).json({ error: 'Failed to set reset token.' });
+
+            // Construct reset link (adjust host as needed)
+            const resetLink = `http://localhost:3000/new-password.html?token=${token}`;
+
+            // Send password reset email
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: 'Password Reset Request',
+                html: `<p>Hello ${user.name || ''},</p>
+                       <p>You requested a password reset. Click the link below to set a new password:</p>
+                       <a href="${resetLink}">${resetLink}</a>
+                       <p>If you did not request this, please ignore this email.</p>`
+            };
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error('Email send error:', error);
+                    return res.status(500).json({ error: 'Failed to send reset email.' });
+                }
+                res.json({ message: 'Password reset email sent!' });
+            });
+        });
+    });
+});
+
+app.post('/new-password', (req, res) => {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) return res.status(400).json({ error: 'Token and new password are required.' });
+
+    // Find user by token
+    db.get(`SELECT * FROM users WHERE reset_token = ?`, [token], (err, user) => {
+        if (err) return res.status(500).json({ error: 'Database error.' });
+        if (!user) return res.status(400).json({ error: 'Invalid or expired token.' });
+
+        // Hash new password and update
+        const hashedPassword = bcrypt.hashSync(newPassword, 10);
+        db.run(`UPDATE users SET password = ?, reset_token = NULL WHERE id = ?`, [hashedPassword, user.id], function(err) {
+            if (err) return res.status(500).json({ error: 'Failed to update password.' });
+            res.json({ message: 'Password has been reset successfully!' });
+        });
+    });
+});
+
+
 app.get('/api/data', (req, res) => {
     const query = `
         SELECT 
@@ -274,10 +231,7 @@ app.get('/api/data', (req, res) => {
 const seedDatabase = require('./seed'); // Adjust the path if needed
 seedDatabase(); // Ensure this runs before the server starts
 
-// Example usage of an environment variable
-console.log('Database URL:', process.env.DATABASE_URL);
-
 // Start the server
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
