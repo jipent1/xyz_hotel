@@ -2,14 +2,15 @@ const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
 
 function seedDatabase() {
-    // Generate a hashed password for the admin
-    const hashedPassword = bcrypt.hashSync('admin123', 10); // Replace 'admin123' with your desired password
+    // Generate hashed passwords
+    const hashedPasswordAdmin = bcrypt.hashSync('admin123', 10);
+    const hashedPasswordJohn = bcrypt.hashSync('johnpassword', 10);
 
     // Initialize the database
-    const db = new sqlite3.Database('users.db');
+    const db = new sqlite3.Database('./users.db');
 
     db.serialize(() => {
-        // Clear existing data (optional for deployment)
+        // Clear existing data
         db.run(`DELETE FROM messages`, (err) => {
             if (err) console.error('Error clearing messages table:', err);
         });
@@ -45,12 +46,19 @@ function seedDatabase() {
             if (err) console.error('Error creating messages table:', err);
         });
 
-        // Seed data
+        // Seed data with passwords
         db.run(`
-            INSERT INTO users (name, email, phone) 
-            VALUES ('John Doe', 'john@example.com', '1234567890')
-        `, (err) => {
+            INSERT INTO users (name, email, phone, password) 
+            VALUES ('John Doe', 'john@example.com', '1234567890', ?)
+        `, [hashedPasswordJohn], (err) => {
             if (err) console.error('Error inserting user John Doe:', err);
+        });
+
+        db.run(`
+            INSERT INTO users (name, email, phone, password) 
+            VALUES ('Admin', 'jipent123@gmail.com', '08023040881', ?)
+        `, [hashedPasswordAdmin], (err) => {
+            if (err) console.error('Error inserting admin user:', err);
         });
 
         db.run(`
@@ -67,17 +75,9 @@ function seedDatabase() {
             if (err) console.error('Error inserting message 2:', err);
         });
 
-        db.run(`
-            INSERT INTO users (name, email, phone, password) 
-            VALUES ('Admin', 'jipent123@gmail.com', '08023040881', ?)
-        `, [hashedPassword], (err) => {
-            if (err) console.error('Error inserting admin user:', err);
-        });
-
         console.log('Database seeded successfully!');
     });
 
-    // Close the database connection
     db.close((err) => {
         if (err) {
             console.error('Error closing the database:', err);
@@ -86,6 +86,4 @@ function seedDatabase() {
         }
     });
 }
-
-// Export the function so it can be imported in server.js
 module.exports = seedDatabase;
