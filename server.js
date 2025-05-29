@@ -33,31 +33,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 // Example route for registering a new user
-/*
 app.post('/register', (req, res) => {
-  const { name, email, phone, password } = req.body;
-  if (!name || !email || !phone || !password) {
-    return res.status(400).json({ error: 'All fields are required.' });
-  }
-  const hashedPassword = bcrypt.hashSync(password, 10);
-
-  const sql = `INSERT INTO users (name, email, phone, password) VALUES (?, ?, ?, ?)`;
-  db.run(sql, [name, email, phone, hashedPassword], function(err) {
-    if (err) {
-      if (err.code === 'SQLITE_CONSTRAINT') {
-        return res.status(400).json({ error: 'Email already registered.' });
-      }
-      return res.status(500).json({ error: 'Database error.' });
-    }
-    res.status(201).json({ message: 'User registered successfully!', userId: this.lastID });
-  });
-});
-*/
-
-app.post('/register', (req, res) => {
-    const { name, email, phone, password } = req.body;
-    if (!name || !email || !phone || !password) {
+    const { name, email, phone, password, confirmPassword } = req.body;
+    if (!name || !email || !phone || !password || !confirmPassword) {
         return res.status(400).json({ error: 'All fields are required.' });
+    }
+    // if (email !== confirmEmail) {
+    //     return res.status(400).json({ error: 'Emails do not match.' });
+    // }
+    if (password !== confirmPassword) {
+        return res.status(400).json({ error: 'Passwords do not match.' });
     }
     db.get('SELECT * FROM users WHERE email = ?', [email], (err, user) => {
         if (err) return res.status(500).json({ error: 'Database error.' });
@@ -92,23 +77,6 @@ transporter.verify((error, success) => {
 });
 
 // Example route for posting a message
-/*app.post('/messages', (req, res) => {
-  const { email, message } = req.body;
-  if (!email || !message) {
-    return res.status(400).json({ error: 'Email and message are required.' });
-  }
-  db.get(`SELECT id FROM users WHERE email = ?`, [email], (err, user) => {
-    if (err) return res.status(500).json({ error: 'Database error.' });
-    if (!user) return res.status(404).json({ error: 'User not found.' });
-
-    db.run(`INSERT INTO messages (user_id, message) VALUES (?, ?)`, [user.id, message], function(err) {
-      if (err) return res.status(500).json({ error: 'Database error.' });
-      res.status(201).json({ message: 'Message posted!', messageId: this.lastID });
-    });
-  });
-});
-*/
-
 app.post('/messages', (req, res) => {
     const { email, message } = req.body;
     if (!email || !message) {
@@ -140,8 +108,15 @@ app.post('/messages', (req, res) => {
 });
 
 
+// Admin login route
 app.post('/admin-login', (req, res) => {
-    const { email, password } = req.body;
+    const { email, confirmEmail, password } = req.body;
+    if (!email || !confirmEmail || !password) {
+        return res.status(400).json({ error: 'All fields are required.' });
+    }
+    if (email !== confirmEmail) {
+        return res.status(400).json({ error: 'Admin emails do not match.' });
+    }
     db.get(`SELECT * FROM users WHERE email = ?`, [email], (err, user) => {
         if(err) return res.status(500).json({ error: 'Database error.' });
         if(!user || user.name.toLowerCase() !== 'admin') return res.status(401).json({ error: 'Not an admin or invalid credentials.' });

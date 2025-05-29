@@ -9,38 +9,61 @@
 <body>
     <h2>Admin Login</h2>
    
-
-<form id="adminLoginForm">
-    <input type="email" id="email" placeholder="Admin Email" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <button type="submit">Login</button><br><br>
-    <p class="forgotPassword"><a href="reset-password.html">Forgot Password?</a></p>
-</form>
+ <form id="adminLoginForm">
+        <input type="email"  placeholder="Admin Email" id="email" required>
+        <input type="email"  placeholder="Confirm Admin Email" id="confirm-email" required>
+        <input type="password"  placeholder="Password" id="password" required>
+        <button type="submit">Login</button><br><br>
+        <p class="forgotPassword"><a href="reset-password.html">Forgot Password?</a></p>
+    </form>
 <div id="response"></div>
 
-    <script src="script.js"></script>
     <script>
-       // Handle admin login
-document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    fetch('/admin-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            email: document.getElementById('email').value.trim(),
-            password: document.getElementById('password').value
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success){
-            window.location.href = 'admin.html'; 
-        } else {
-            document.getElementById('response').textContent = data.error || 'Login failed';
+    document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const confirmEmail = document.getElementById('confirm-email').value.trim();
+        const password = document.getElementById('password').value;
+        const responseDiv = document.getElementById('response');
+        responseDiv.textContent = '';
+
+        if (!email || !confirmEmail || !password) {
+            responseDiv.textContent = "All fields are required.";
+            responseDiv.style.color = 'red';
+            return;
         }
-      
+
+        if (email !== confirmEmail) {
+            responseDiv.textContent = "Admin emails do not match.";
+            responseDiv.style.color = 'red';
+            return;
+        }
+
+       fetch('/admin-login', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({
+            email,
+            confirmEmail,
+            password
+            })
+        })
+
+        .then(res => res.json())
+        .then(data => {
+            if(data.success){
+                window.location.href = 'admin.html'; 
+            } else {
+                responseDiv.textContent = data.error || 'Login failed';
+                responseDiv.style.color = 'red';
+            }
+        })
+        .catch(() => {
+            responseDiv.textContent = "Login failed. Please try again later.";
+            responseDiv.style.color = 'red';
+        });
     });
-});
     </script>
+    
 </body>
 </html>

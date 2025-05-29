@@ -11,10 +11,11 @@
 
 
 <form id="registerForm">
-  <input id="name" placeholder="Name">
-  <input id="email" placeholder="Email">
-  <input id="phone" placeholder="Phone">
-  <input id="password" type="password" placeholder="Password">
+  <input type="text" placeholder="Name" id="name" name="name" required  >
+  <input type="email" placeholder="Email" id="email" name="email" required >
+  <input type="phone" placeholder="Phone" id="phone" name="phone" required  >
+  <input type="password" placeholder="Password" id="password" name="password" required  >
+  <input type="password" placeholder="Confirm Password" id="confirm-password" name="confirm-password" required  >
   <button type="submit">Register</button>
 
   <div class="signIn">
@@ -22,7 +23,7 @@
   </div>
 </form>
 <p id="response-message"></p>
- 
+
 
    <script>
     document.getElementById('registerForm').addEventListener('submit', function(event) {
@@ -31,21 +32,35 @@
         const email = document.getElementById('email').value.trim();
         const phone = document.getElementById('phone').value.trim();
         const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
 
         const responseDiv = document.getElementById('response-message');
         responseDiv.textContent = '';
 
-        if (!name || !email || !phone || !password) {
+        if (!name || !email || !phone || !password || !confirmPassword) {
             responseDiv.textContent = "All fields are required.";
             responseDiv.style.color = 'red';
             return;
         }
 
-        fetch('/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, phone, password })
+        if (password !== confirmPassword) {
+            responseDiv.textContent = "Passwords do not match.";
+            responseDiv.style.color = 'red';
+            return;
+        }
+
+      fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          password,
+          confirmPassword
+          })
         })
+
         .then(res => res.json())
         .then(data => {
             if (data.message) {
@@ -63,5 +78,6 @@
         });
     });
     </script>
+
 </body>
 </html>
